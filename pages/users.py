@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import numpy as np 
+from api import get_usuarios
 
 st.title('Usuários')
 st.markdown('Painel de usuários e suas permissões')
@@ -10,18 +10,30 @@ tab1, tab2 = st.tabs(['Usuários', 'Remover Usuários'])
 
 with tab1:
     st.markdown('## Usuários Cadastrados')
-    df = pd.read_csv('./data/usuarios.csv')
-    st.dataframe(df)
+    df_usuarios = get_usuarios()
+    if not df_usuarios.empty:
+        # Formatando a data de criação
+        df_usuarios['data_criacao'] = df_usuarios['data_criacao'].dt.strftime('%d/%m/%Y %H:%M')
+        st.dataframe(
+            df_usuarios[['nome', 'nivel_usuario', 'data_criacao']]
+            .sort_values('data_criacao', ascending=False)
+        )
+    else:
+        st.info("Sem usuários cadastrados")
 
 with tab2:
     st.markdown('## Remover usuários')
 
-    with st.form("my_second_form"):
+    with st.form("remover_usuario"):
         st.write("Remover Usuário")
-        # Adicionar lista dos usuários depois ***** 
-        selected_user = st.selectbox("Selecione um usuário para apagar", ["User 1", 'User 2'])
-
-        # Every form must have a submit button.
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            st.write("Usuário: ", selected_user, " removido com sucesso ✅")
+        df_usuarios = get_usuarios()
+        if not df_usuarios.empty:
+            usuarios = df_usuarios['nome'].tolist()
+            selected_user = st.selectbox("Selecione um usuário para apagar", usuarios)
+            submitted = st.form_submit_button("Remover")
+            if submitted:
+                st.warning(f"Funcionalidade de remoção ainda não implementada na API")
+                st.write("Usuário selecionado para remoção: ", selected_user)
+        else:
+            st.info("Sem usuários cadastrados para remover")
+            st.form_submit_button("Remover", disabled=True)
