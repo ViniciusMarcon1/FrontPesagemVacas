@@ -72,3 +72,14 @@ def criar_alerta(id_vaca, tipo_alerta):
         return response.status_code == 201
     except:
         return False 
+
+def delete_vaca(nome):
+    try:
+        print(f"Trying to delete vaca: {nome}")
+        response = requests.post(f"{BASE_URL}/vacas/delete", json={"nome": nome})
+        print(f"Status code: {response.status_code}")
+        print(f"Response body: {response.text}")
+        return response.status_code == 200
+    except Exception as e:
+        print("Exception in delete_vaca:", e)
+        return False
