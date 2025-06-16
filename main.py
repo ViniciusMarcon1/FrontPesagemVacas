@@ -38,9 +38,9 @@ def logout():
 login_page = st.Page(login, title="Log in", icon=":material/login:")
 logout_page = st.Page(logout, title="Log out", icon=":material/logout:")      
 
-home = st.Page("pages/home.py", title="Home", icon="🐮")
+home = st.Page("pages/home.py", title="Home", icon="🦜")
 users = st.Page("pages/users.py", title="Usuários", icon="👤")
-dashboards = st.Page("pages/dashboards.py", title="Análises", icon="📊")
+vacas = st.Page("pages/vacas.py", title="Vacas", icon="🐮")
 reports = st.Page("pages/reports.py", title="Relatórios", icon="📑")
 config = st.Page("pages/config.py", title="Config", icon="⚙")
 
@@ -50,7 +50,7 @@ sd = st.sidebar.title('Gralha Azul')
 if st.session_state.logged_in:
     pg = st.navigation(
         {
-        "Páginas Principais": [home, users, dashboards, reports], 
+        "Páginas Principais": [home, users, vacas, reports], 
         "Configurações" : [config, logout_page]
         }
     )
