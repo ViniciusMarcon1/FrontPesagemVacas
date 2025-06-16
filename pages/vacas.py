@@ -19,12 +19,17 @@ with tab1:
 
 # TAB 2 – Adicionar Vacas (placeholder)
 with tab2:
-    st.markdown('## Adicionar Vacas')
-    st.info("Funcionalidade de adição ainda não implementada.")
+    st.markdown('## Adicionar vacas')
 
-# TAB 3 – Remover Vacas
-with tab3:
-    st.markdown('## Remover Vacas')
+    with st.form("adicionar_vacas"):
+        st.write("Adicionar Vacas")
+        nome = st.text_input('Nome da vaca')
+        data_nascimento = st.date_input('Data Nascimento')
+        rfid = st.text_input("RFID da Tag da Vaca")
+        st.form_submit_button('Adicionar')
+
+with tab3: 
+    st.markdown('## Remover vacas')
 
     with st.form("remover_vaca"):
         df_vacas = get_vacas()

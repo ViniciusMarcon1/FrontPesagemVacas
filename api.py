@@ -56,7 +56,7 @@ def get_usuarios():
         if response.status_code == 200:
             data = response.json()
             df = pd.DataFrame(data)
-            df['data_criacao'] = pd.to_datetime(df['data_criacao'])
+            df['criado_em'] = pd.to_datetime(df['criado_em'])
             return df
         return pd.DataFrame()
     except:
