@@ -1,7 +1,9 @@
 import streamlit as st
 import pandas as pd
 import numpy as np 
-from api import get_pesagens, get_vacas, get_alertas
+import requests
+import json 
+from api import get_pesagens, get_vacas, get_alertas, get_medidas
 
 st.title('Dashboard')
 st.markdown('Bem vindo ao Dashboard da Fazenda Exprimental Gralha Azul')
@@ -12,6 +14,7 @@ st.divider()
 df_pesagens = get_pesagens()
 df_vacas = get_vacas()
 df_alertas = get_alertas()
+df_medidas = get_medidas()
 
 col1, col2, col3 = st.columns(3)
 
@@ -56,5 +59,34 @@ if not df_pesagens.empty:
         df_completo[['nome', 'rfid', 'pesagem', 'data_hora']]
         .sort_values('data_hora', ascending=False)
     )
+else:
+    st.info("Sem dados de pesagem disponíveis")
+
+st.markdown('## Medidas')
+if not df_medidas.empty:
+    edited_df = st.data_editor(df_medidas, num_rows="dynamic", use_container_width=True)
+
+    if st.button("Salvar alterações"):
+        st.info("Enviando alterações ao banco de dados...")
+
+        # Verifica alterações linha a linha e envia via POST
+        for index, row in edited_df.iterrows():
+            original_row = df_medidas.loc[index]
+            if not row.equals(original_row):
+                payload = row.to_dict()
+                #payload = json.loads(row.to_json(date_format='iso'))
+
+                for key, value in payload.items():
+                    if isinstance(value, pd.Timestamp):
+                        payload[key] = value.strftime('%Y-%m-%d %H:%M:%S')
+
+                try:
+                    response = requests.post("http://localhost:8080/api/edit_medida", json=payload)
+                    if response.status_code == 200:
+                        st.success(f"Medida {payload['id_medida']} atualizada com sucesso!")
+                    else:
+                        st.error(f"Erro ao atualizar medida {payload['id_medida']}: {response.text}")
+                except Exception as e:
+                    st.error(f"Erro de conexão ao atualizar medida {payload['id_medida']}: {str(e)}")
 else:
     st.info("Sem dados de pesagem disponíveis")

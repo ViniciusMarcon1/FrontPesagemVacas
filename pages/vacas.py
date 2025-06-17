@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from api import get_vacas, delete_vaca
+import requests
 
 st.title('Vacas')
 st.markdown('Painel de vacas e suas informações')
@@ -24,25 +25,53 @@ with tab2:
     with st.form("adicionar_vacas"):
         st.write("Adicionar Vacas")
         nome = st.text_input('Nome da vaca')
-        data_nascimento = st.date_input('Data Nascimento')
+        data_nascimento = st.date_input('Data de Nascimento')
         rfid = st.text_input("RFID da Tag da Vaca")
-        st.form_submit_button('Adicionar')
+        submitted = st.form_submit_button('Adicionar')
+
+        if submitted:
+            if nome and data_nascimento and rfid:
+                response = requests.post("http://localhost:8080/api/add_vaca", json={
+                    "nome": nome,
+                    "data_nascimento": data_nascimento.isoformat(), 
+                    "rfid": rfid
+                })
+
+                if response.status_code == 201:
+                    st.success("Vaca adicionada com sucesso!")
+                    st.rerun()
+                elif response.status_code == 409:
+                    st.warning("Uma vaca com este RFID já existe.")
+                else:
+                    st.error(f"Erro ao adicionar: {response.json().get('error', 'Erro desconhecido')}")
+            else:
+                st.warning("Preencha todos os campos para adicionar a vaca.")
 
 with tab3: 
     st.markdown('## Remover vacas')
 
     with st.form("remover_vaca"):
+        st.write("Remover Vaca")
         df_vacas = get_vacas()
+
         if not df_vacas.empty:
-            nomes_vacas = df_vacas['nome'].tolist()
-            selected_vaca = st.selectbox("Selecione uma vaca para remover", nomes_vacas)
+            vacas_dict = dict(zip(df_vacas['nome'], df_vacas['id_vaca']))
+            selected_vaca_name = st.selectbox("Selecione uma vaca para remover", list(vacas_dict.keys()))
             submitted = st.form_submit_button("Remover")
 
             if submitted:
-                sucesso = delete_vaca(selected_vaca)
-                if sucesso:
-                    st.success(f'Vaca "{selected_vaca}" removida com sucesso.')
+                vaca_id = vacas_dict[selected_vaca_name]
+
+                response = requests.post("http://localhost:8080/api/delete_vaca", json={"id_vaca": vaca_id})
+
+                if response.status_code == 200:
+                    st.success(f'Vaca "{selected_vaca_name}" removida com sucesso.')
                 else:
-                    st.error("Erro ao remover vaca. Verifique se o backend está rodando.")
+                    try:
+                        error_msg = response.json().get('error', 'Erro desconhecido')
+                    except ValueError:
+                        error_msg = response.text or 'Erro desconhecido'
+                    st.error(f"Erro ao remover: {error_msg}")
         else:
             st.info("Sem vacas cadastradas para remover.")
+            st.form_submit_button("Remover", disabled=True)
