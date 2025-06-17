@@ -16,6 +16,17 @@ df_vacas = get_vacas()
 df_alertas = get_alertas()
 df_medidas = get_medidas()
 
+opcoes_vacas = df_vacas[['id_vaca', 'nome']].drop_duplicates()
+vacas_dict = dict(zip(opcoes_vacas['nome'], opcoes_vacas['id_vaca']))
+
+nome_selecionado = st.selectbox("Selecione uma vaca", ["Todas"] + list(vacas_dict.keys()))
+
+if nome_selecionado != "Todas":
+    id_filtrado = vacas_dict[nome_selecionado]
+    df_pesagens = df_pesagens[df_pesagens['id_vaca'] == id_filtrado]
+    if 'id_vaca' in df_alertas.columns:
+        df_alertas = df_alertas[df_alertas['id_vaca'] == id_filtrado]
+
 col1, col2, col3 = st.columns(3)
 
 with col1:

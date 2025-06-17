@@ -5,7 +5,7 @@ import api
 
 st.title('Relatórios')
 st.markdown('Relatórios e dados disponíveis para download')
-st.sidebar.markdown('- Adicionar descrição.')
+st.sidebar.markdown('- Dados e relatórios disponíveis para download em CSV')
 
 df_vacas = api.get_vacas()
 df_pesagens = api.get_pesagens()
